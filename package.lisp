@@ -1,4 +1,5 @@
 ;;;; package.lisp
 
 (defpackage #:snake
-  (:use #:cl))
+  (:use #:cl)
+  (:export play))
