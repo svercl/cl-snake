@@ -5,6 +5,8 @@
 (defparameter +segment-size+ 10.0)
 (defparameter +screen-width+ 800)
 (defparameter +screen-height+ 600)
+(defparameter +snake-color+ (gamekit:vec4 1.0 0.75 0.5 1.0))
+(defparameter +food-color+ (gamekit:vec4 0.5 0.25 1.0 1.0))
 
 ;; TODO(bsvercl): Use this for wrapping snake position.
 (defgeneric mod-vec (vec divisor))
@@ -89,10 +91,10 @@
           for position = (position-of segment)
           do (gamekit:draw-rect position
                                 +segment-size+ +segment-size+
-                                :fill-paint (gamekit:vec4 1.0 0.75 0.5 1.0))))
+                                :fill-paint +snake-color+)))
   (gamekit:draw-rect (food-pos-of this)
                      +segment-size+ +segment-size+
-                     :fill-paint (gamekit:vec4 0.5 0.25 1.0 1.0)))
+                     :fill-paint +food-color+))
 
 (defun play ()
   (gamekit:start 'snake-game :viewport-resizable nil))
