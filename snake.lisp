@@ -81,19 +81,33 @@
 
 (defmethod gamekit:act ((this snake-game))
   ;; TODO(bsvercl): This is ugly.
-  (with-slots (segments direction) (player-of this)
-    (with-slots (position) (aref segments 0)
-      (setf position (gamekit:add position direction)))))
+  (let* ((player (player-of this))
+         (direction (direction-of player))
+         (position (snake-position player)))
+    (setf (snake-position player) (gamekit:add position direction))))
+    ;; (with-slots (position) (aref segments 0)
+    ;;   (setf position (gamekit:add position direction)))))
 
 (defmethod gamekit:draw ((this snake-game))
+  (loop for x from 0 to 31
+        for xx = (floor (* x +segment-size+))
+        do (loop for y from 0 to 23
+                 for yy = (* y +segment-size+)
+                 do (gamekit:draw-rect (gamekit:vec2 xx yy)
+                                       +segment-size+
+                                       +segment-size+
+                                       :fill-paint (gamekit:vec4)
+                                       :stroke-paint (gamekit:vec4 0.8 0.8 0.8 1.0))))
   (with-slots (segments) (player-of this)
     (loop for segment across segments
           for position = (position-of segment)
           do (gamekit:draw-rect position
-                                +segment-size+ +segment-size+
+                                +segment-size+
+                                +segment-size+
                                 :fill-paint +snake-color+)))
   (gamekit:draw-rect (food-pos-of this)
-                     +segment-size+ +segment-size+
+                     +segment-size+
+                     +segment-size+
                      :fill-paint +food-color+))
 
 (defun play ()
