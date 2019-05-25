@@ -3,60 +3,80 @@
 (in-package #:snake)
 
 (defparameter +segment-size+ 10.0)
+(defparameter *screen-width* 800)
+(defparameter *screen-height* 600)
 
+;; TODO(bsvercl): Use this for wrapping snake position.
+(defgeneric mod-vec (vec divisor))
+(defmethod mod-vec ((vec gamekit:vec2) divisor)
+  (gamekit:vec2 (mod (gamekit:x vec) divisor)
+                (mod (gamekit:y vec) divisor)))
+
+;; TODO(bsvercl): POSITION-OF does not seem to work correctly,
+;; which is why WITH-SLOTS is used all over.
 (defclass segment ()
-  ((position
-    :initarg :position
-    :initform (gamekit:vec2)
-    :accessor segment-position)
-   (direction ;; :up :down :left :right
-    :initarg :direction
-    :initform (error "Must supply :direction.")
-    :accessor segment-direction)))
+  ((position :initarg :position :accessor position-of)))
 
-(defun make-segment (position direction)
-  (make-instance 'segment :position position :direction direction))
+(defun make-segment (position)
+  (make-instance 'segment :position position))
 
 (defclass snake ()
-  ((segments
-    :initarg :segments
-    :initform nil
-    :accessor snake-segments)))
+  ((segments :initarg :segments :accessor segments-of)
+   (direction :initarg :direction :accessor direction-of)))
 
-(defmethod initialize-instance :after ((this snake) &key)
-  (push (make-segment (gamekit:vec2) :up) (snake-segments this)))
+(defun make-snake (starting-position &optional (direction (gamekit:vec2)))
+  (let* ((head (make-segment starting-position))
+         (segments (make-array 1 :element-type 'segment
+                                 :initial-element head
+                                 :adjustable t
+                                 :fill-pointer t)))
+    (make-instance 'snake :segments segments :direction direction)))
 
 (defun snake-head (snake)
-  (first (snake-segments snake)))
+  (aref (segments-of snake) 0))
 
-(defun change-direction (snake dir)
-  (let* ((segments (snake-segments snake))
-         (segment (first segments)))
-    (setf (segment-direction segment) dir)))
+(defun change-direction (snake direction)
+  (setf (direction-of snake) direction))
 
 (gamekit:defgame snake-game ()
-  ((player :type snake))
+  ((player :type snake :accessor player-of)
+   (food-pos :initform nil :accessor food-pos-of))
   (:viewport-title "Snake")
   (:viewport-width 800)
   (:viewport-height 600))
 
 (defmethod gamekit:post-initialize ((this snake-game))
-  (with-slots (player) this
-    (setf player (make-instance 'snake)))
-  (gamekit:bind-button :w :pressed
-               (lambda ()
-                 ())))
+  (with-slots (player food-pos) this
+    (setf player (make-snake (gamekit:vec2)))
+    ;; TODO(bsvercl): avoid selecting a spot occupied by the player.
+    (flet ((random-location (size)
+             (floor (/ +segment-size+ (random size)))))
+      (let ((x-pos (random-location *screen-width*))
+            (y-pos (random-location *screen-height*)))
+        (setf food-pos (gamekit:vec2 x-pos y-pos))))
+    (with-slots (direction) player
+      ;; TODO(bsvercl): ??? I think we can go deeper.
+      (macrolet ((binder (keycode &body body)
+                   `(gamekit:bind-button ,keycode :pressed
+                                         (lambda () ,@body))))
+        (binder :w (setf direction (gamekit:vec2 0 1)))
+        (binder :s (setf direction (gamekit:vec2 0 -1)))
+        (binder :a (setf direction (gamekit:vec2 -1 0)))
+        (binder :d (setf direction (gamekit:vec2 1 0)))))))
 
 (defmethod gamekit:act ((this snake-game))
-  ())
+  ;; TODO(bsvercl): This is ugly.
+  (with-slots (segments direction) (player-of this)
+    (with-slots (position) (aref segments 0)
+      (setf position (gamekit:add position direction)))))
 
 (defmethod gamekit:draw ((this snake-game))
-  (gamekit:draw-text "Hello" (gamekit:vec2 10 10))
-  (with-slots (player) this
-    (let ((segments (snake-segments player)))
-      (dolist (segment segments)
-        (let ((pos (segment-position segment)))
-          (gamekit:draw-rect pos +segment-size+ +segment-size+ :fill-paint (gamekit:vec4 1.0 0.75 0.5 1.0)))))))
+  (with-slots (segments) (player-of this)
+    (loop for segment across segments
+          do (with-slots (position) segment
+               (gamekit:draw-rect position
+                                  +segment-size+ +segment-size+
+                                  :fill-paint (gamekit:vec4 1.0 0.75 0.5 1.0))))))
 
 (defun play ()
   (gamekit:start 'snake-game :viewport-resizable nil))
