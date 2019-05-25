@@ -14,8 +14,6 @@
   (gamekit:vec2 (mod (gamekit:x vec) divisor)
                 (mod (gamekit:y vec) divisor)))
 
-;; TODO(bsvercl): POSITION-OF does not seem to work correctly,
-;; which is why WITH-SLOTS is used all over.
 (defclass segment ()
   ((position :initarg :position :accessor position-of)))
 
