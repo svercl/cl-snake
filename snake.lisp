@@ -3,8 +3,8 @@
 (in-package #:snake)
 
 (defparameter +segment-size+ 10.0)
-(defparameter *screen-width* 800)
-(defparameter *screen-height* 600)
+(defparameter +screen-width+ 800)
+(defparameter +screen-height+ 600)
 
 ;; TODO(bsvercl): Use this for wrapping snake position.
 (defgeneric mod-vec (vec divisor))
@@ -42,8 +42,8 @@
   ((player :type snake :accessor player-of)
    (food-pos :initform nil :accessor food-pos-of))
   (:viewport-title "Snake")
-  (:viewport-width 800)
-  (:viewport-height 600))
+  (:viewport-width +screen-width+)
+  (:viewport-height +screen-height+))
 
 (defmethod gamekit:post-initialize ((this snake-game))
   (with-slots (player food-pos) this
