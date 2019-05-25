@@ -2,7 +2,7 @@
 
 (in-package #:snake)
 
-(defparameter +segment-size+ 10.0)
+(defparameter +segment-size+ 25.0)
 (defparameter +screen-width+ 800)
 (defparameter +screen-height+ 600)
 (defparameter +snake-color+ (gamekit:vec4 1.0 0.75 0.5 1.0))
