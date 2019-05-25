@@ -107,13 +107,12 @@
                                        +segment-size+
                                        :fill-paint (gamekit:vec4)
                                        :stroke-paint (gamekit:vec4 0.8 0.8 0.8 1.0))))
-  (with-slots (segments) (player-of this)
-    (loop for segment across segments
-          for position = (position-of segment)
-          do (gamekit:draw-rect position
-                                +segment-size+
-                                +segment-size+
-                                :fill-paint +snake-color+)))
+  (loop for segment across (segments-of (player-of this))
+        for position = (position-of segment)
+        do (gamekit:draw-rect position
+                              +segment-size+
+                              +segment-size+
+                              :fill-paint +snake-color+))
   (gamekit:draw-rect (food-pos-of this)
                      +segment-size+
                      +segment-size+
