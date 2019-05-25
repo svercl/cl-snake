@@ -94,7 +94,15 @@
   (let* ((player (player-of this))
          (direction (direction-of player))
          (position (snake-position player)))
-    (setf (snake-position player) (gamekit:add position direction))))
+    (setf (snake-position player) (gamekit:add position direction))
+    (when (> (gamekit:x position) +screen-width+)
+      (setf (gamekit:x (snake-position player)) 0))
+    (when (< (gamekit:x position) 0)
+      (setf (gamekit:x (snake-position player)) +screen-width+))
+    (when (> (gamekit:y position) +screen-height+)
+      (setf (gamekit:y (snake-position player)) 0))
+    (when (< (gamekit:y position) 0)
+      (setf (gamekit:y (snake-position player)) +screen-height+))))
 
 (defmethod gamekit:draw ((this snake-game))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
