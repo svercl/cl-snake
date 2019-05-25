@@ -72,7 +72,10 @@
         (binder :s (setf direction (gamekit:vec2 0 -1)))
         (binder :a (setf direction (gamekit:vec2 -1 0)))
         (binder :d (setf direction (gamekit:vec2 1 0)))
-        (binder :space (setf direction (gamekit:vec2)))))))
+        (binder :space (setf direction (gamekit:vec2)))
+        ;; NOTE: This is just for debugging.
+        (binder :q (with-slots (food-pos) this
+                     (setf food-pos (new-food-pos))))))))
 
 (defmethod gamekit:act ((this snake-game))
   ;; TODO(bsvercl): This is ugly.
