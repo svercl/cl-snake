@@ -83,10 +83,13 @@
 (defmethod gamekit:draw ((this snake-game))
   (with-slots (segments) (player-of this)
     (loop for segment across segments
-          do (with-slots (position) segment
-               (gamekit:draw-rect position
-                                  +segment-size+ +segment-size+
-                                  :fill-paint (gamekit:vec4 1.0 0.75 0.5 1.0))))))
+          for position = (position-of segment)
+          do (gamekit:draw-rect position
+                                +segment-size+ +segment-size+
+                                :fill-paint (gamekit:vec4 1.0 0.75 0.5 1.0))))
+  (gamekit:draw-rect (food-pos-of this)
+                     +segment-size+ +segment-size+
+                     :fill-paint (gamekit:vec4 0.5 0.25 1.0 1.0)))
 
 (defun play ()
   (gamekit:start 'snake-game :viewport-resizable nil))
