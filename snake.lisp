@@ -15,16 +15,20 @@
                 (mod (gamekit:y vec) divisor)))
 
 (defclass segment ()
-  ((position :initarg :position :accessor position-of)))
+  ((position :initarg :position :accessor position-of))
+  (:documentation "Part of a SNAKE."))
 
 (defun make-segment (position)
+  "Creates a SEGMENT with POSITION."
   (make-instance 'segment :position position))
 
 (defclass snake ()
   ((segments :initarg :segments :accessor segments-of)
-   (direction :initarg :direction :accessor direction-of)))
+   (direction :initarg :direction :accessor direction-of))
+  (:documentation "The moving thing, usually user controlled."))
 
 (defun make-snake (starting-position &optional (direction (gamekit:vec2)))
+  "Creates a SNAKE with STARTING-POSITION and DIRECTION."
   (let* ((head (make-segment starting-position))
          (segments (make-array 1 :element-type 'segment
                                  :initial-element head
@@ -104,6 +108,8 @@
 
 (defmethod gamekit:draw ((this snake-game))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
+  ;; This draws a grid using hard-coded constants. :) Horribly.
+  ;; Don't do this at home, kids!
   (loop for x from 0 to 31
         for xx = (floor (* x +segment-size+))
         do (loop for y from 0 to 23
@@ -113,12 +119,14 @@
                                        +segment-size+
                                        :fill-paint (gamekit:vec4)
                                        :stroke-paint (gamekit:vec4 0.8 0.8 0.8 1.0))))
+  ;; Draw SNAKE
   (loop for segment across (segments-of (player-of this))
         for position = (position-of segment)
         do (gamekit:draw-rect position
                               +segment-size+
                               +segment-size+
                               :fill-paint +snake-color+))
+  ;; Draw food
   (gamekit:draw-rect (food-pos-of this)
                      +segment-size+
                      +segment-size+
