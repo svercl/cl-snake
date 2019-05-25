@@ -37,6 +37,19 @@
 (defun snake-head (snake)
   (aref (segments-of snake) 0))
 
+(defun snake-position (snake)
+  (position-of (snake-head snake)))
+
+(defmethod (setf snake-position) (pos snake)
+  (with-slots (segments) snake
+    (with-slots (position) (aref segments 0)
+      (setf position pos))))
+
+(defun snake-positions (snake)
+  (loop for segment across (segments-of snake)
+        with position = (position-of segment)
+        collect position))
+
 (defun change-direction (snake direction)
   (setf (direction-of snake) direction))
 
