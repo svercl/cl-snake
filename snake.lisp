@@ -45,24 +45,33 @@
   (:viewport-width +screen-width+)
   (:viewport-height +screen-height+))
 
+(defun new-food-pos ()
+  (flet ((random-location (size)
+           (floor (/ (random size) +segment-size+))))
+    (gamekit:vec2 (random-location +screen-width+)
+                  (random-location +screen-height+))))
+
 (defmethod gamekit:post-initialize ((this snake-game))
   (with-slots (player food-pos) this
     (setf player (make-snake (gamekit:vec2)))
     ;; TODO(bsvercl): avoid selecting a spot occupied by the player.
-    (flet ((random-location (size)
-             (floor (/ +segment-size+ (random size)))))
-      (let ((x-pos (random-location *screen-width*))
-            (y-pos (random-location *screen-height*)))
-        (setf food-pos (gamekit:vec2 x-pos y-pos))))
+    (setf food-pos (new-food-pos))
     (with-slots (direction) player
       ;; TODO(bsvercl): ??? I think we can go deeper.
       (macrolet ((binder (keycode &body body)
                    `(gamekit:bind-button ,keycode :pressed
                                          (lambda () ,@body))))
+        ;; TODO(bsvercl): Something like this. Although minor, it would be kind of nice.
+        ;; (loop for (keycode . dir) in `((:w . ,(gamekit:vec2 0 1))
+        ;;                                (:s . ,(gamekit:vec2 0 -1))
+        ;;                                (:a . ,(gamekit:vec2 -1 0))
+        ;;                                (:d . ,(gamekit:vec2 1 0)))
+        ;;       do (binder keycode (setf direction dir)))))))
         (binder :w (setf direction (gamekit:vec2 0 1)))
         (binder :s (setf direction (gamekit:vec2 0 -1)))
         (binder :a (setf direction (gamekit:vec2 -1 0)))
-        (binder :d (setf direction (gamekit:vec2 1 0)))))))
+        (binder :d (setf direction (gamekit:vec2 1 0)))
+        (binder :space (setf direction (gamekit:vec2)))))))
 
 (defmethod gamekit:act ((this snake-game))
   ;; TODO(bsvercl): This is ugly.
