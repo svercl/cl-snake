@@ -60,7 +60,6 @@
   (:viewport-width +screen-width+)
   (:viewport-height +screen-height+))
 
-;; TODO(bsvercl): This doesn't output correct coordinates.
 (defun new-food-pos ()
   (flet ((random-location (size)
            (* (floor (/ (random size) +segment-size+)) +segment-size+)))
