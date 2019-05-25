@@ -71,36 +71,33 @@
     (setf player (make-snake (gamekit:vec2)))
     ;; TODO(bsvercl): avoid selecting a spot occupied by the player.
     (setf food-pos (new-food-pos))
-    (with-slots (direction) player
-      ;; TODO(bsvercl): ??? I think we can go deeper.
-      (macrolet ((binder (keycode &body body)
-                   `(gamekit:bind-button ,keycode :pressed
-                                         (lambda () ,@body))))
-        ;; TODO(bsvercl): Something like this. Although minor, it would be kind of nice.
-        ;; (loop for (keycode . dir) in `((:w . ,(gamekit:vec2 0 1))
-        ;;                                (:s . ,(gamekit:vec2 0 -1))
-        ;;                                (:a . ,(gamekit:vec2 -1 0))
-        ;;                                (:d . ,(gamekit:vec2 1 0)))
-        ;;       do (binder keycode (setf direction dir)))))))
-        (binder :w (setf direction (gamekit:vec2 0 1)))
-        (binder :s (setf direction (gamekit:vec2 0 -1)))
-        (binder :a (setf direction (gamekit:vec2 -1 0)))
-        (binder :d (setf direction (gamekit:vec2 1 0)))
-        (binder :space (setf direction (gamekit:vec2)))
-        ;; NOTE: This is just for debugging.
-        (binder :q (with-slots (food-pos) this
-                     (setf food-pos (new-food-pos))))))))
+    ;; TODO(bsvercl): ??? I think we can go deeper.
+    (macrolet ((binder (keycode &body body)
+                 `(gamekit:bind-button ,keycode :pressed
+                                       (lambda () ,@body))))
+      ;; TODO(bsvercl): Something like this. Although minor, it would be kind of nice.
+      ;; (loop for (keycode . dir) in `((:w . ,(gamekit:vec2 0 1))
+      ;;                                (:s . ,(gamekit:vec2 0 -1))
+      ;;                                (:a . ,(gamekit:vec2 -1 0))
+      ;;                                (:d . ,(gamekit:vec2 1 0)))
+      ;;       do (binder keycode (change-direction player dir)))))))
+      (with-slots (direction) player
+        (binder :w (change-direction player (gamekit:vec2 0 1)))
+        (binder :s (change-direction player (gamekit:vec2 0 -1)))
+        (binder :a (change-direction player (gamekit:vec2 -1 0)))
+        (binder :d (change-direction player (gamekit:vec2 1 0)))
+        (binder :space (change-direction player (gamekit:vec2))))
+      ;; NOTE: This is just for debugging.
+      (binder :q (setf food-pos (new-food-pos))))))
 
 (defmethod gamekit:act ((this snake-game))
-  ;; TODO(bsvercl): This is ugly.
   (let* ((player (player-of this))
          (direction (direction-of player))
          (position (snake-position player)))
     (setf (snake-position player) (gamekit:add position direction))))
-    ;; (with-slots (position) (aref segments 0)
-    ;;   (setf position (gamekit:add position direction)))))
 
 (defmethod gamekit:draw ((this snake-game))
+  ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
   (loop for x from 0 to 31
         for xx = (floor (* x +segment-size+))
         do (loop for y from 0 to 23
