@@ -47,7 +47,7 @@
 
 (defun snake-positions (snake)
   (loop for segment across (segments-of snake)
-        with position = (position-of segment)
+        for position = (position-of segment)
         collect position))
 
 (defun change-direction (snake direction)
