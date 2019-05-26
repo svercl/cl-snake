@@ -8,6 +8,7 @@
 
 (defparameter +snake-color+ (gamekit:vec4 1.0 0.75 0.5 1.0))
 (defparameter +food-color+ (gamekit:vec4 0.5 0.25 1.0 1.0))
+(defparameter +grid-color+ (gamekit:vec4 0.8 0.8 0.8 1.0))
 (defparameter +transparent+ (gamekit:vec4))
 
 (defun vec2= (a b)
@@ -120,7 +121,7 @@
                                        +segment-size+
                                        +segment-size+
                                        :fill-paint +transparent+
-                                       :stroke-paint (gamekit:vec4 0.8 0.8 0.8 1.0))))
+                                       :stroke-paint +grid-color+)))
   ;; Draw SNAKE
   (loop for segment across (segments-of (player-of this))
         do (gamekit:draw-rect segment
