@@ -10,6 +10,12 @@
 (defparameter +food-color+ (gamekit:vec4 0.5 0.25 1.0 1.0))
 (defparameter +transparent+ (gamekit:vec4))
 
+(defun vec2= (a b)
+  (and (= (gamekit:x a)
+          (gamekit:x b))
+       (= (gamekit:y a)
+          (gamekit:y b))))
+
 ;; TODO(bsvercl): Use this for wrapping snake position.
 (defun mod-vec (vec divisor)
   "MOD x and y of VEC by DIVISOR."
@@ -87,19 +93,22 @@
       ;; NOTE: This is just for debugging.
       (binder :q (setf food-pos (new-food-pos))))))
 
+;; TODO(bsvercl): Game moves TOO fast.
 (defmethod gamekit:act ((this snake-game))
-  (let* ((player (player-of this))
-         (direction (direction-of player))
-         (position (snake-position player)))
-    (setf (snake-position player) (gamekit:add position direction))
-    (when (> (gamekit:x position) +screen-width+)
-      (setf (gamekit:x (snake-position player)) 0))
-    (when (< (gamekit:x position) 0)
-      (setf (gamekit:x (snake-position player)) +screen-width+))
-    (when (> (gamekit:y position) +screen-height+)
-      (setf (gamekit:y (snake-position player)) 0))
-    (when (< (gamekit:y position) 0)
-      (setf (gamekit:y (snake-position player)) +screen-height+))))
+  (with-slots (player food-pos) this
+    (let ((direction (direction-of player))
+          (position (snake-position player)))
+      (setf (snake-position player) (snap-to-grid (gamekit:add position (gamekit:mult direction +segment-size+))))
+      (when (> (gamekit:x position) +screen-width+)
+        (setf (gamekit:x (snake-position player)) 0))
+      (when (< (gamekit:x position) 0)
+        (setf (gamekit:x (snake-position player)) +screen-width+))
+      (when (> (gamekit:y position) +screen-height+)
+        (setf (gamekit:y (snake-position player)) 0))
+      (when (< (gamekit:y position) 0)
+        (setf (gamekit:y (snake-position player)) +screen-height+))
+      (when (vec2= food-pos position)
+        (setf food-pos (new-food-pos))))))
 
 (defmethod gamekit:draw ((this snake-game))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
