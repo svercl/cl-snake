@@ -5,20 +5,24 @@
 (defparameter +segment-size+ 25.0)
 (defparameter +screen-width+ 800)
 (defparameter +screen-height+ 600)
+
 (defparameter +snake-color+ (gamekit:vec4 1.0 0.75 0.5 1.0))
 (defparameter +food-color+ (gamekit:vec4 0.5 0.25 1.0 1.0))
+(defparameter +transparent+ (gamekit:vec4))
 
 ;; TODO(bsvercl): Use this for wrapping snake position.
-(defgeneric mod-vec (vec divisor))
-(defmethod mod-vec ((vec gamekit:vec2) divisor)
+(defun mod-vec (vec divisor)
+  "MOD x and y of VEC by DIVISOR."
   (gamekit:vec2 (mod (gamekit:x vec) divisor)
                 (mod (gamekit:y vec) divisor)))
 
 (defun floor-vec (vec)
+  "FLOOR x and y of VEC."
   (gamekit:vec2 (floor (gamekit:x vec))
                 (floor (gamekit:y vec))))
 
 (defun snap-to-grid (vec &optional (cell-size (gamekit:vec2 +segment-size+ +segment-size+)))
+  "Snap VEC to CELL-SIZE."
   (gamekit:mult (floor-vec (gamekit:div vec cell-size)) cell-size))
 
 (defclass snake ()
@@ -41,14 +45,16 @@
   (setf (aref (segments-of snake) 0) pos))
 
 (defun snake-positions (snake)
+  "All POSITIONS occupied by SNAKE."
   (loop for segment across (segments-of snake)
         collect segment))
 
-(defun change-direction (snake direction)
-  (setf (direction-of snake) direction))
+(defun change-direction (snake new-direction)
+  "Modify DIRECTION of SNAKE with NEW-DIRECTION."
+  (setf (direction-of snake) new-direction))
 
 (gamekit:defgame snake-game ()
-  ((player :type snake :accessor player-of)
+  ((player :accessor player-of)
    (food-pos :initform nil :accessor food-pos-of))
   (:viewport-title "Snake")
   (:viewport-width +screen-width+)
@@ -73,12 +79,11 @@
       ;;                                (:a . ,(gamekit:vec2 -1 0))
       ;;                                (:d . ,(gamekit:vec2 1 0)))
       ;;       do (binder keycode (change-direction player dir)))))))
-      (with-slots (direction) player
-        (binder :w (change-direction player (gamekit:vec2 0 1)))
-        (binder :s (change-direction player (gamekit:vec2 0 -1)))
-        (binder :a (change-direction player (gamekit:vec2 -1 0)))
-        (binder :d (change-direction player (gamekit:vec2 1 0)))
-        (binder :space (change-direction player (gamekit:vec2))))
+      (binder :w (change-direction player (gamekit:vec2 0 1)))
+      (binder :s (change-direction player (gamekit:vec2 0 -1)))
+      (binder :a (change-direction player (gamekit:vec2 -1 0)))
+      (binder :d (change-direction player (gamekit:vec2 1 0)))
+      (binder :space (change-direction player (gamekit:vec2)))
       ;; NOTE: This is just for debugging.
       (binder :q (setf food-pos (new-food-pos))))))
 
@@ -98,8 +103,6 @@
 
 (defmethod gamekit:draw ((this snake-game))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
-  ;; This draws a grid using hard-coded constants. :) Horribly.
-  ;; Don't do this at home, kids!
   (loop for x from 0 to (floor (/ +screen-width+ +segment-size+))
         for xx = (floor (* x +segment-size+))
         do (loop for y from 0 to (floor (/ +screen-height+ +segment-size+))
@@ -107,7 +110,7 @@
                  do (gamekit:draw-rect (gamekit:vec2 xx yy)
                                        +segment-size+
                                        +segment-size+
-                                       :fill-paint (gamekit:vec4)
+                                       :fill-paint +transparent+
                                        :stroke-paint (gamekit:vec4 0.8 0.8 0.8 1.0))))
   ;; Draw SNAKE
   (loop for segment across (segments-of (player-of this))
