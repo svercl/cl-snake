@@ -14,14 +14,6 @@
   (gamekit:vec2 (mod (gamekit:x vec) divisor)
                 (mod (gamekit:y vec) divisor)))
 
-(defclass segment ()
-  ((position :initarg :position :accessor position-of))
-  (:documentation "Part of a SNAKE."))
-
-(defun make-segment (position)
-  "Creates a SEGMENT with POSITION."
-  (make-instance 'segment :position position))
-
 (defclass snake ()
   ((segments :initarg :segments :accessor segments-of)
    (direction :initarg :direction :accessor direction-of))
@@ -29,28 +21,25 @@
 
 (defun make-snake (starting-position &optional (direction (gamekit:vec2)))
   "Creates a SNAKE with STARTING-POSITION and DIRECTION."
-  (let* ((head (make-segment starting-position))
-         (segments (make-array 1 :element-type 'segment
-                                 :initial-element head
-                                 :adjustable t
-                                 :fill-pointer t)))
+  (let ((segments (make-array 1 :element-type 'gamekit:vec2
+                                :initial-element starting-position
+                                :adjustable t
+                                :fill-pointer t)))
     (make-instance 'snake :segments segments :direction direction)))
 
 (defun snake-head (snake)
   (aref (segments-of snake) 0))
 
 (defun snake-position (snake)
-  (position-of (snake-head snake)))
+  (snake-head snake))
 
 (defmethod (setf snake-position) (pos snake)
   (with-slots (segments) snake
-    (with-slots (position) (aref segments 0)
-      (setf position pos))))
+    (setf (aref segments 0) pos)))
 
 (defun snake-positions (snake)
   (loop for segment across (segments-of snake)
-        for position = (position-of segment)
-        collect position))
+        collect segment))
 
 (defun change-direction (snake direction)
   (setf (direction-of snake) direction))
@@ -121,8 +110,7 @@
                                        :stroke-paint (gamekit:vec4 0.8 0.8 0.8 1.0))))
   ;; Draw SNAKE
   (loop for segment across (segments-of (player-of this))
-        for position = (position-of segment)
-        do (gamekit:draw-rect position
+        do (gamekit:draw-rect segment
                               +segment-size+
                               +segment-size+
                               :fill-paint +snake-color+))
