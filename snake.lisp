@@ -60,9 +60,23 @@
   "Modify DIRECTION of SNAKE with NEW-DIRECTION."
   (setf (direction-of snake) new-direction))
 
+(defun advance (snake)
+  (with-slots (segments direction) snake
+    (let ((position (snake-position snake)))
+      (setf (snake-position snake) (snap-to-grid (gamekit:add position (gamekit:mult direction +segment-size+))))
+      (cond ((> (gamekit:x position) +screen-width+)
+             (setf (gamekit:x (snake-position snake)) 0))
+            ((< (gamekit:x position) 0)
+             (setf (gamekit:x (snake-position snake)) +screen-width+))
+            ((> (gamekit:y (snake-position snake)) +screen-height+)
+             (setf (gamekit:y (snake-position snake)) 0))
+            ((< (gamekit:y (snake-position snake)) 0)
+             (setf (gamekit:y (snake-position snake)) +screen-height+))))))
+
+
 (gamekit:defgame snake-game ()
   ((player :accessor player-of)
-   (food-pos :initform nil :accessor food-pos-of))
+   (food-pos :accessor food-pos-of))
   (:viewport-title "Snake")
   (:viewport-width +screen-width+)
   (:viewport-height +screen-height+))
@@ -94,22 +108,15 @@
       ;; NOTE: This is just for debugging.
       (binder :q (setf food-pos (new-food-pos))))))
 
-;; TODO(bsvercl): Game moves TOO fast.
+;; TODO(bsvercl): Game moves too fast.
 (defmethod gamekit:act ((this snake-game))
   (with-slots (player food-pos) this
-    (let ((direction (direction-of player))
-          (position (snake-position player)))
-      (setf (snake-position player) (snap-to-grid (gamekit:add position (gamekit:mult direction +segment-size+))))
-      (cond ((> (gamekit:x position) +screen-width+)
-             (setf (gamekit:x (snake-position player)) 0))
-            ((< (gamekit:x position) 0)
-             (setf (gamekit:x (snake-position player)) +screen-width+))
-            ((> (gamekit:y (snake-position player)) +screen-height+)
-             (setf (gamekit:y (snake-position player)) 0))
-            ((< (gamekit:y (snake-position player)) 0)
-             (setf (gamekit:y (snake-position player)) +screen-height+)))
+    (let ((position (snake-position player)))
+      (advance player)
       (when (vec2= food-pos position)
-        (setf food-pos (new-food-pos))))))
+        (setf food-pos (new-food-pos)))))
+  ;; TODO(bsvercl): Remove this SLEEP.
+  (sleep 0.1))
 
 (defmethod gamekit:draw ((this snake-game))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
