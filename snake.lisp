@@ -14,6 +14,13 @@
   (gamekit:vec2 (mod (gamekit:x vec) divisor)
                 (mod (gamekit:y vec) divisor)))
 
+(defun floor-vec (vec)
+  (gamekit:vec2 (floor (gamekit:x vec))
+                (floor (gamekit:y vec))))
+
+(defun snap-to-grid (vec &optional (cell-size (gamekit:vec2 +segment-size+ +segment-size+)))
+  (gamekit:mult (floor-vec (gamekit:div vec cell-size)) cell-size))
+
 (defclass snake ()
   ((segments :initarg :segments :accessor segments-of)
    (direction :initarg :direction :accessor direction-of))
@@ -27,15 +34,11 @@
                                 :fill-pointer t)))
     (make-instance 'snake :segments segments :direction direction)))
 
-(defun snake-head (snake)
+(defun snake-position (snake)
   (aref (segments-of snake) 0))
 
-(defun snake-position (snake)
-  (snake-head snake))
-
 (defmethod (setf snake-position) (pos snake)
-  (with-slots (segments) snake
-    (setf (aref segments 0) pos)))
+  (setf (aref (segments-of snake) 0) pos))
 
 (defun snake-positions (snake)
   (loop for segment across (segments-of snake)
@@ -52,10 +55,8 @@
   (:viewport-height +screen-height+))
 
 (defun new-food-pos ()
-  (flet ((random-location (size)
-           (* (floor (/ (random size) +segment-size+)) +segment-size+)))
-    (gamekit:vec2 (random-location +screen-width+)
-                  (random-location +screen-height+))))
+  (snap-to-grid (gamekit:vec2 (random +screen-width+)
+                              (random +screen-height+))))
 
 (defmethod gamekit:post-initialize ((this snake-game))
   (with-slots (player food-pos) this
@@ -99,9 +100,9 @@
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
   ;; This draws a grid using hard-coded constants. :) Horribly.
   ;; Don't do this at home, kids!
-  (loop for x from 0 to 31
+  (loop for x from 0 to (floor (/ +screen-width+ +segment-size+))
         for xx = (floor (* x +segment-size+))
-        do (loop for y from 0 to 23
+        do (loop for y from 0 to (floor (/ +screen-height+ +segment-size+))
                  for yy = (* y +segment-size+)
                  do (gamekit:draw-rect (gamekit:vec2 xx yy)
                                        +segment-size+
