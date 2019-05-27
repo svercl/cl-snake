@@ -64,15 +64,15 @@
   (with-slots (segments direction) snake
     (let ((position (snake-position snake)))
       (setf (snake-position snake) (snap-to-grid (gamekit:add position (gamekit:mult direction +segment-size+))))
-      (cond ((> (gamekit:x position) +screen-width+)
-             (setf (gamekit:x (snake-position snake)) 0))
-            ((< (gamekit:x position) 0)
-             (setf (gamekit:x (snake-position snake)) +screen-width+))
-            ((> (gamekit:y (snake-position snake)) +screen-height+)
-             (setf (gamekit:y (snake-position snake)) 0))
-            ((< (gamekit:y (snake-position snake)) 0)
-             (setf (gamekit:y (snake-position snake)) +screen-height+))))))
-
+      (cond
+        ((> (gamekit:x position) +screen-width+)
+         (setf (gamekit:x (snake-position snake)) 0))
+        ((< (gamekit:x position) 0)
+         (setf (gamekit:x (snake-position snake)) +screen-width+))
+        ((> (gamekit:y (snake-position snake)) +screen-height+)
+         (setf (gamekit:y (snake-position snake)) 0))
+        ((< (gamekit:y (snake-position snake)) 0)
+         (setf (gamekit:y (snake-position snake)) +screen-height+))))))
 
 (gamekit:defgame snake-game ()
   ((player :reader player-of)
