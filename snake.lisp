@@ -39,22 +39,14 @@
 
 (defun make-snake (starting-position &optional (direction (gamekit:vec2)))
   "Creates a SNAKE with STARTING-POSITION and DIRECTION."
-  (let ((segments (make-array 1 :element-type 'gamekit:vec2
-                                :initial-element starting-position
-                                :adjustable t
-                                :fill-pointer t)))
+  (let ((segments (list starting-position)))
     (make-instance 'snake :segments segments :direction direction)))
 
 (defun snake-position (snake)
-  (aref (segments-of snake) 0))
+  (first (segments-of snake)))
 
 (defmethod (setf snake-position) (pos snake)
-  (setf (aref (segments-of snake) 0) pos))
-
-(defun snake-positions (snake)
-  "All POSITIONS occupied by SNAKE."
-  (loop for segment across (segments-of snake)
-        collect segment))
+  (setf (first (segments-of snake)) pos))
 
 (defun change-direction (snake new-direction)
   "Modify DIRECTION of SNAKE with NEW-DIRECTION."
@@ -62,8 +54,11 @@
 
 (defun advance (snake)
   (with-slots (segments direction) snake
-    (let ((position (snake-position snake)))
-      (setf (snake-position snake) (snap-to-grid (gamekit:add position (gamekit:mult direction +segment-size+))))
+    (let* ((position (snake-position snake))
+           (new-head (gamekit:add position (gamekit:mult direction +segment-size+)))
+           (segments-without-end (butlast segments))
+           (new-segments (push new-head segments-without-end)))
+      (setf segments new-segments)
       (cond
         ((> (gamekit:x position) +screen-width+)
          (setf (gamekit:x (snake-position snake)) 0))
@@ -130,7 +125,7 @@
                                        :fill-paint +transparent+
                                        :stroke-paint +grid-color+)))
   ;; Draw SNAKE
-  (loop for segment across (segments-of (player-of this))
+  (loop for segment in (segments-of (player-of this))
         do (gamekit:draw-rect segment
                               +segment-size+
                               +segment-size+
