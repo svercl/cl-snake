@@ -75,7 +75,7 @@
 
 
 (gamekit:defgame snake-game ()
-  ((player :accessor player-of)
+  ((player :reader player-of)
    (food-pos :accessor food-pos-of))
   (:viewport-title "Snake")
   (:viewport-width +screen-width+)
