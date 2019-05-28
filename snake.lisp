@@ -122,7 +122,7 @@
                                        +segment-size+ +segment-size+
                                        :fill-paint +transparent+
                                        :stroke-paint +grid-color+)))
- ;; Draw food
+  ;; Draw food
   (gamekit:draw-rect (gamekit:mult (food-pos-of this) +segment-size+)
                      +segment-size+ +segment-size+
                      :fill-paint +food-color+)
