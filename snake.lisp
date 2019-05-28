@@ -104,13 +104,13 @@
   (incf *frame-count*)
   (when (> *frame-count* +speed+)
     (setf *frame-count* 0)
-  (with-slots (player food-pos score) this
-    (let* ((position (snake-position player))
-           (ate-food-p (vec2= food-pos position)))
-      (advance player ate-food-p)
-      (when ate-food-p
-        (setf food-pos (new-food-pos))
-        (incf score (random 100)))))))
+    (with-slots (player food-pos score) this
+      (let* ((position (snake-position player))
+             (ate-food-p (vec2= food-pos position)))
+        (advance player ate-food-p)
+        (when ate-food-p
+          (setf food-pos (new-food-pos))
+          (incf score (random 100)))))))
 
 (defmethod gamekit:draw ((this snake-game))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
