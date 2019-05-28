@@ -34,8 +34,8 @@
 
 (defun make-snake (starting-position &optional (direction (gamekit:vec2)))
   "Creates a SNAKE with STARTING-POSITION and DIRECTION."
-  (let ((segments (list starting-position)))
-    (make-instance 'snake :segments segments :direction direction)))
+  (make-instance 'snake :segments (list starting-position)
+                        :direction direction))
 
 (defun snake-position (snake)
   "Head position of SNAKE."
@@ -77,7 +77,8 @@
 
 (defmethod gamekit:post-initialize ((this snake-game))
   (with-slots (player food-pos) this
-    (setf player (make-snake (gamekit:vec2 (/ +segments-across-width+ 2) (/ +segments-across-height+ 2))))
+    (setf player (make-snake (gamekit:vec2 (/ +segments-across-width+ 2)
+                                           (/ +segments-across-height+ 2))))
     ;; TODO(bsvercl): avoid selecting a spot occupied by the player.
     (setf food-pos (new-food-pos))
     ;; TODO(bsvercl): ??? I think we can go deeper.
@@ -116,7 +117,8 @@
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
   (loop for x from 0 below +segments-across-width+
         do (loop for y from 0 below +segments-across-height+
-                 do (gamekit:draw-rect (gamekit:mult (gamekit:vec2 x y) +segment-size+)
+                 do (gamekit:draw-rect (gamekit:mult (gamekit:vec2 x y)
+                                                     +segment-size+)
                                        +segment-size+ +segment-size+
                                        :fill-paint +transparent+
                                        :stroke-paint +grid-color+)))
