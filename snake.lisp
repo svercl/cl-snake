@@ -91,7 +91,7 @@
       (binder :s (change-direction player (gamekit:vec2 0 -1)))
       (binder :a (change-direction player (gamekit:vec2 -1 0)))
       (binder :d (change-direction player (gamekit:vec2 1 0)))
-      ;; NOTE: This is just for debugging.
+      ;; NOTE: These are for debugging.
       (binder :space (change-direction player (gamekit:vec2)))
       (binder :e (setf (snake-position player) (gamekit:vec2)))
       (binder :q (setf food-pos (new-food-pos))))))
@@ -104,7 +104,7 @@
       (advance player ate-food-p)
       (when ate-food-p
         (setf food-pos (new-food-pos))
-        (incf score 100))))
+        (incf score (random 100)))))
   ;; TODO(bsvercl): Remove this SLEEP.
   (sleep 0.09))
 
@@ -127,7 +127,7 @@
                                :fill-paint +snake-color+))
         (segments-of (player-of this)))
   ;; Draw SCORE
-  (gamekit:draw-text (format nil "Score: ~A" (score-of this))
+  (gamekit:draw-text (format nil "Score: ~R" (score-of this))
                      (gamekit:vec2 25 (- +screen-height+ 25))))
 
 (defun play ()
