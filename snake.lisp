@@ -13,9 +13,6 @@
 (defparameter +grid-color+ (gamekit:vec4 0.9 0.9 0.9 0.5))
 (defparameter +transparent+ (gamekit:vec4))
 
-(defvar *frame-count* 0)
-(defparameter +speed+ 5)
-
 (defun vec2= (a b)
   (and (= (gamekit:x a)
           (gamekit:x b))
@@ -68,7 +65,8 @@
    (score :initform 0 :reader score-of))
   (:viewport-title "Snake")
   (:viewport-width +screen-width+)
-  (:viewport-height +screen-height+))
+  (:viewport-height +screen-height+)
+  (:act-rate 10))
 
 (defun new-food-pos ()
   "Generates a new spot on the grid."
@@ -102,16 +100,13 @@
 
 (defmethod gamekit:act ((this snake-game))
   ;; TODO(bsvercl): This is slow on slow processors. ;)
-  (incf *frame-count*)
-  (when (> *frame-count* +speed+)
-    (setf *frame-count* 0)
-    (with-slots (player food-pos score) this
-      (let* ((position (snake-position player))
-             (ate-food-p (vec2= food-pos position)))
-        (advance player ate-food-p)
-        (when ate-food-p
-          (setf food-pos (new-food-pos))
-          (incf score (random 100)))))))
+  (with-slots (player food-pos score) this
+    (let* ((position (snake-position player))
+           (ate-food-p (vec2= food-pos position)))
+      (advance player ate-food-p)
+      (when ate-food-p
+        (setf food-pos (new-food-pos))
+        (incf score (random 100))))))
 
 (defmethod gamekit:draw ((this snake-game))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
