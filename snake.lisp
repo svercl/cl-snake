@@ -99,7 +99,6 @@
       (binder :q (setf food-pos (new-food-pos))))))
 
 (defmethod gamekit:act ((this snake-game))
-  ;; TODO(bsvercl): This is slow on slow processors. ;)
   (with-slots (player food-pos score) this
     (let* ((position (snake-position player))
            (ate-food-p (vec2= food-pos position)))
