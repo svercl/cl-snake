@@ -13,11 +13,11 @@
 (defparameter +grid-color+ (gamekit:vec4 0.9 0.9 0.9 0.5))
 (defparameter +transparent+ (gamekit:vec4))
 
-(defun vec2= (a b)
-  (and (= (gamekit:x a)
-          (gamekit:x b))
-       (= (gamekit:y a)
-          (gamekit:y b))))
+(defun vec2= (this that)
+  (and (= (gamekit:x this)
+          (gamekit:x that))
+       (= (gamekit:y this)
+          (gamekit:y that))))
 
 (defun mod-vec (this that)
   "MOD x and y of THIS by x and y of THAT."
