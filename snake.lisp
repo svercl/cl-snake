@@ -125,11 +125,10 @@
                                        :fill-paint +transparent+
                                        :stroke-paint +grid-color+)))
   ;; Draw SNAKE
-  (loop for segment in (segments-of (player-of this))
-        do (gamekit:draw-rect segment
-                              +segment-size+
-                              +segment-size+
-                              :fill-paint +snake-color+))
+  (mapc #'(lambda (pos)
+            (gamekit:draw-rect pos +segment-size+ +segment-size+
+                               :fill-paint +snake-color+))
+        (segments-of (player-of this)))
   ;; Draw food
   (gamekit:draw-rect (food-pos-of this)
                      +segment-size+
