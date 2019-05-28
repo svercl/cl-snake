@@ -2,7 +2,7 @@
 
 (in-package #:snake)
 
-(defparameter +segment-size+ 25.0)
+(defparameter +segment-size+ 25)
 (defparameter +screen-width+ 800)
 (defparameter +screen-height+ 600)
 (defparameter +segments-across-width+ (floor (/ +screen-width+ +segment-size+)))
