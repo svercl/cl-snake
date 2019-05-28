@@ -100,8 +100,8 @@
       (binder :e (setf (snake-position player) (gamekit:vec2)))
       (binder :q (setf food-pos (new-food-pos))))))
 
-;; TODO(bsvercl): Game moves too fast.
 (defmethod gamekit:act ((this snake-game))
+  ;; TODO(bsvercl): This is slow on slow processors. ;)
   (incf *frame-count*)
   (when (> *frame-count* +speed+)
     (setf *frame-count* 0)
