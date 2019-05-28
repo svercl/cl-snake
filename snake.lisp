@@ -13,6 +13,9 @@
 (defparameter +grid-color+ (gamekit:vec4 0.9 0.9 0.9 0.5))
 (defparameter +transparent+ (gamekit:vec4))
 
+(defvar *frame-count* 0)
+(defparameter +speed+ 5)
+
 (defun vec2= (a b)
   (and (= (gamekit:x a)
           (gamekit:x b))
@@ -98,15 +101,16 @@
 
 ;; TODO(bsvercl): Game moves too fast.
 (defmethod gamekit:act ((this snake-game))
+  (incf *frame-count*)
+  (when (> *frame-count* +speed+)
+    (setf *frame-count* 0)
   (with-slots (player food-pos score) this
     (let* ((position (snake-position player))
            (ate-food-p (vec2= food-pos position)))
       (advance player ate-food-p)
       (when ate-food-p
         (setf food-pos (new-food-pos))
-        (incf score (random 100)))))
-  ;; TODO(bsvercl): Remove this SLEEP.
-  (sleep 0.09))
+        (incf score (random 100)))))))
 
 (defmethod gamekit:draw ((this snake-game))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
