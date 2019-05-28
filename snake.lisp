@@ -52,12 +52,13 @@
   "Modify DIRECTION of SNAKE with NEW-DIRECTION."
   (setf (direction-of snake) new-direction))
 
-(defun advance (snake)
+(defun advance (snake ate-food-p)
   (with-slots (segments direction) snake
     (let* ((position (snake-position snake))
            (new-head (gamekit:add position (gamekit:mult direction +segment-size+)))
-           (segments-without-end (butlast segments))
-           (new-segments (push new-head segments-without-end)))
+           (segments (if ate-food-p segments (butlast segments)))
+           (new-segments (push new-head segments)))
+      (mapc #'(lambda (pos) (gamekit:add pos (gamekit:mult direction +segment-size+))) segments)
       (setf segments new-segments)
       (cond
         ((> (gamekit:x position) +screen-width+)
@@ -106,9 +107,10 @@
 ;; TODO(bsvercl): Game moves too fast.
 (defmethod gamekit:act ((this snake-game))
   (with-slots (player food-pos) this
-    (let ((position (snake-position player)))
-      (advance player)
-      (when (vec2= food-pos position)
+    (let* ((position (snake-position player))
+           (ate-food-p (vec2= food-pos position)))
+      (advance player ate-food-p)
+      (when ate-food-p
         (setf food-pos (new-food-pos)))))
   ;; TODO(bsvercl): Remove this SLEEP.
   (sleep 0.1))
