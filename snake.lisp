@@ -19,11 +19,10 @@
        (= (gamekit:y a)
           (gamekit:y b))))
 
-;; TODO(bsvercl): Use this for wrapping snake position.
-(defun mod-vec (vec divisor)
+(defun mod-vec (this that)
   "MOD x and y of VEC by DIVISOR."
-  (gamekit:vec2 (mod (gamekit:x vec) (gamekit:x divisor))
-                (mod (gamekit:y vec) (gamekit:y divisor))))
+  (gamekit:vec2 (mod (gamekit:x this) (gamekit:x that))
+                (mod (gamekit:y this) (gamekit:y that))))
 
 (defclass snake ()
   ((segments :initarg :segments :accessor segments-of)
