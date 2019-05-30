@@ -2,7 +2,7 @@
 
 This is a simple game of snake.
 
-# Installation
+## Installation and running
 
 ```
 ;; add cl-bodge distribution if you haven't already
@@ -10,6 +10,14 @@ This is a simple game of snake.
 (ql:quickload :snake)
 (snake:play)
 ```
+
+## Requirements
+
+Should be the same as [TRIVIAL-GAMEKIT](https://github.com/borodust/trivial-gamekit)
+
+- OpenGL 2.1 or 3.3+
+- 64-bit (x86_64) Windows, GNU/Linux or macOS
+- x86_64 SBCL or CCL
 
 ## License
 
