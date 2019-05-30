@@ -59,10 +59,11 @@
 (defun advance (snake ate-food-p)
   (with-slots (segments direction) snake
     (let* ((position (snake-position snake))
-           (head (gamekit:add position  direction))
+           ;; The position of the next head.
+           (new-head (gamekit:add position direction))
+           ;; If we ate the food we do not chop of the end of the SEGMENTS.
            (which-segments (if ate-food-p segments (butlast segments)))
-           (new-segments (push head which-segments)))
-      (mapc #'(lambda (pos) (gamekit:add pos direction)) segments)
+           (new-segments (push new-head which-segments)))
       (setf segments new-segments)
       ;; Wrap SNAKE around the boundaries
       (setf (snake-position snake) (mod-vec (snake-position snake)
