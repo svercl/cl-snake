@@ -49,11 +49,12 @@
 (defun change-direction (snake direction)
   "Modify DIRECTION of SNAKE with NEW-DIRECTION."
   (let ((new-direction (case direction
-                                (:up (gamekit:vec2 0 1))
-                                (:down (gamekit:vec2 0 -1))
-                                (:left (gamekit:vec2 -1 0))
-                                (:right (gamekit:vec2 1 0))
-                                (t (gamekit:vec2)))))
+                         (:up (gamekit:vec2 0 1))
+                         (:down (gamekit:vec2 0 -1))
+                         (:left (gamekit:vec2 -1 0))
+                         (:right (gamekit:vec2 1 0))
+                         ;; We don't know that this is supposed to be.
+                         (t (gamekit:vec2)))))
     (setf (direction-of snake) new-direction)))
 
 (defun advance (snake ate-food-p)
