@@ -46,9 +46,15 @@
   (rest (segments-of snake)))
 
 ;; TODO(bsvercl): Don't allow Left<->Right Up<->Down
-(defun change-direction (snake new-direction)
+(defun change-direction (snake direction)
   "Modify DIRECTION of SNAKE with NEW-DIRECTION."
-  (setf (direction-of snake) new-direction))
+  (let ((new-direction (case direction
+                                (:up (gamekit:vec2 0 1))
+                                (:down (gamekit:vec2 0 -1))
+                                (:left (gamekit:vec2 -1 0))
+                                (:right (gamekit:vec2 1 0))
+                                (t (gamekit:vec2)))))
+    (setf (direction-of snake) new-direction)))
 
 (defun advance (snake ate-food-p)
   (with-slots (segments direction) snake
@@ -69,55 +75,56 @@
           when (vec2= segment head-position)
             do (return-from hit-itself t))))
 
-(gamekit:defgame snake-game ()
-  ((player :reader player-of)
-   (food-pos :reader food-pos-of)
-   (score :initform 0 :reader score-of))
-  (:viewport-title "Snake")
-  (:viewport-width +screen-width+)
-  (:viewport-height +screen-height+)
-  (:act-rate 10))
+(defclass state () ())
 
-(defun new-food-pos ()
-  "Generates a new spot on the grid."
-  (gamekit:vec2 (random +segments-across-width+)
-                (random +segments-across-height+)))
+(defgeneric update (state)
+  (:method (state) (declare (ignore state))))
+(defgeneric draw (state)
+  (:method (state) (declare (ignore state))))
+(defgeneric handle-key (state key)
+  (:method (state key) (declare (ignore state key))))
 
-(defmethod gamekit:post-initialize ((this snake-game))
+(defclass main-menu-state (state)
+  ((start-callback :initarg :start)))
+
+(defmethod handle-key ((this main-menu-state) key)
+  (with-slots (start-callback) this
+    (when (eq key :space)
+      (funcall start-callback))))
+
+(defmethod draw ((this main-menu-state))
+  (declare (ignore this))
+  (let ((bounds (gamekit:calc-text-bounds "Welcome to SNAKE"))))
+  (gamekit:draw-text "Welcome to SNAKE" (gamekit:vec2 (/ +screen-width+ 2)
+                                                      (/ +screen-height+ 2)))
+  (gamekit:draw-text "Press SPACE to play" (gamekit:add (gamekit:vec2 (/ +screen-width+ 2)
+                                                                       (/ +screen-height+ 2))
+                                                         (gamekit:vec2 0 -20))))
+
+(defclass game-state (state)
+  ((player :type snake :reader player-of)
+   (food-pos :type gamekit:vec2 :reader food-pos-of)
+   (score :type integer :initform 0 :reader score-of)
+   (end-callback :initarg :end)))
+
+(defmethod initialize-instance :after ((this game-state) &key)
   (with-slots (player food-pos) this
-    (setf player (make-snake (gamekit:vec2 (/ +segments-across-width+ 2)
-                                           (/ +segments-across-height+ 2))))
-    ;; TODO(bsvercl): avoid selecting a spot occupied by the player.
     (setf food-pos (new-food-pos))
-    ;; TODO(bsvercl): ??? I think we can go deeper.
-    (macrolet ((binder (keycode &body body)
-                 `(gamekit:bind-button ,keycode :pressed
-                                       (lambda () ,@body))))
-      ;; TODO(bsvercl): Something like this. Although minor, it would be kind of nice.
-      ;; (loop for (keycode . dir) in `((:w . ,(gamekit:vec2 0 1))
-      ;;                                (:s . ,(gamekit:vec2 0 -1))
-      ;;                                (:a . ,(gamekit:vec2 -1 0))
-      ;;                                (:d . ,(gamekit:vec2 1 0)))
-      ;;       do (binder keycode (change-direction player dir)))))))
-      (binder :w (change-direction player (gamekit:vec2 0 1)))
-      (binder :s (change-direction player (gamekit:vec2 0 -1)))
-      (binder :a (change-direction player (gamekit:vec2 -1 0)))
-      (binder :d (change-direction player (gamekit:vec2 1 0)))
-      ;; NOTE: These are for debugging.
-      (binder :space (change-direction player (gamekit:vec2)))
-      (binder :e (setf (snake-position player) (gamekit:vec2)))
-      (binder :q (setf food-pos (new-food-pos))))))
+    (setf player (make-snake (gamekit:vec2 (/ +segments-across-width+ 2)
+                                           (/ +segments-across-height+ 2))))))
 
-(defmethod gamekit:act ((this snake-game))
+(defmethod update ((this game-state))
   (with-slots (player food-pos score) this
-    (let* ((position (snake-position player))
-           (ate-food-p (vec2= food-pos position)))
+    (let* ((pos (snake-position player))
+           (ate-food-p (vec2= food-pos pos)))
       (advance player ate-food-p)
       (when ate-food-p
         (setf food-pos (new-food-pos))
-        (incf score (random 100))))))
+        (incf score 50))
+      (when (hit-itself player)
+        (setf score -1)))))
 
-(defmethod gamekit:draw ((this snake-game))
+(defmethod draw ((this game-state))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
   (loop for x from 0 below +segments-across-width+
         do (loop for y from 0 below +segments-across-height+
@@ -131,14 +138,61 @@
                      +segment-size+ +segment-size+
                      :fill-paint +food-color+)
   ;; Draw SNAKE
-  (mapc #'(lambda (pos)
-            (gamekit:draw-rect (gamekit:mult pos +segment-size+)
-                               +segment-size+ +segment-size+
-                               :fill-paint +snake-color+))
-        (segments-of (player-of this)))
+  (dolist (pos (segments-of (player-of this)))
+    (gamekit:draw-rect (gamekit:mult pos +segment-size+)
+                       +segment-size+ +segment-size+
+                       :fill-paint +snake-color+))
   ;; Draw SCORE
-  (gamekit:draw-text (format nil "Score: ~R" (score-of this))
+  (gamekit:draw-text (format nil "Score: ~A" (score-of this))
                      (gamekit:vec2 25 (- +screen-height+ 25))))
 
-(defun play ()
-  (gamekit:start 'snake-game :viewport-resizable nil))
+(defmethod handle-key ((state game-state) key)
+  (with-slots (player) state
+    (case key
+      (:w (change-direction player :up))
+      (:s (change-direction player :down))
+      (:a (change-direction player :left))
+      (:d (change-direction player :right))
+      (:space (change-direction player :nothing)))))
+
+(gamekit:defgame snake-game ()
+  ((current-state :accessor state-of))
+  (:viewport-title "Snake")
+  (:viewport-width +screen-width+)
+  (:viewport-height +screen-height+)
+  (:act-rate 10))
+
+(defun new-food-pos ()
+  "Generates a new spot on the grid."
+  (gamekit:vec2 (random +segments-across-width+)
+                (random +segments-across-height+)))
+
+(defmethod gamekit:post-initialize ((this snake-game))
+  (with-slots (current-state) this
+    (labels ((start ()
+               (setf current-state (make-instance 'game-state :end #'end)))
+             (end ()
+               ;; TODO(bsvercl): Game over state.
+               (print "uh oh, we haven't implemented this yet.")))
+      (setf current-state (make-instance 'main-menu-state :start #'start)))
+    (macrolet ((%binder (key &body body)
+                 `(gamekit:bind-button ,key :pressed #'(lambda () ,@body))))
+      ;; TODO(bsvercl): Make this prettier.
+      (%binder :w (handle-key current-state :w))
+      (%binder :s (handle-key current-state :s))
+      (%binder :a (handle-key current-state :a))
+      (%binder :d (handle-key current-state :d))
+      (%binder :space (handle-key current-state :space))
+      (%binder :q (handle-key current-state :q))
+      (%binder :e (handle-key current-state :e)))))
+
+(defmethod gamekit:act ((this snake-game))
+  (with-slots (current-state) this
+    (update current-state)))
+
+(defmethod gamekit:draw ((this snake-game))
+  (with-slots (current-state) this
+    (draw current-state)))
+
+(defun play (&optional blocking)
+  (gamekit:start 'snake-game :viewport-resizable nil :blocking blocking))
