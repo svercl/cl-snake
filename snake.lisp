@@ -111,11 +111,12 @@
 (defmethod initialize-instance :after ((this game-state) &key)
   (with-slots (player food-pos) this
     (setf food-pos (new-food-pos))
+    ;; TODO(bsvercl): We should really have a CENTERED function or something.
     (setf player (make-snake (gamekit:vec2 (/ +segments-across-width+ 2)
                                            (/ +segments-across-height+ 2))))))
 
 (defmethod update ((this game-state))
-  (with-slots (player food-pos score) this
+  (with-slots (player food-pos score end-callback) this
     (let* ((pos (snake-position player))
            (ate-food-p (bodge-math:vec= food-pos pos)))
       (advance player ate-food-p)
@@ -123,7 +124,8 @@
         (setf food-pos (new-food-pos))
         (incf score 50))
       (when (hit-itself player)
-        (setf score -1)))))
+        (setf score -1)
+        (funcall end-callback)))))
 
 (defmethod draw ((this game-state))
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
@@ -147,17 +149,36 @@
   (gamekit:draw-text (format nil "Score: ~A" (score-of this))
                      (gamekit:vec2 25 (- +screen-height+ 25))))
 
-(defmethod handle-key ((state game-state) key)
-  (with-slots (player) state
+(defmethod handle-key ((this game-state) key)
+  (with-slots (player food-pos) this
     (case key
       (:w (change-direction player :up))
       (:s (change-direction player :down))
       (:a (change-direction player :left))
       (:d (change-direction player :right))
-      (:space (change-direction player :nothing)))))
+      (:space (change-direction player :nothing))
+      (:q (setf food-pos (new-food-pos))))))
+
+(defclass game-over-state (state)
+  ((restart-callback :initarg :restart)))
+
+(defmethod draw ((this game-over-state))
+  (declare (ignore this))
+  (gamekit:draw-text "Good job, dummy! You ate yourself."
+                     (gamekit:vec2 (/ +screen-width+ 2)
+                                   (/ +screen-height+ 2)))
+  (gamekit:draw-text "Press SPACE to restart."
+                     (gamekit:subt (gamekit:vec2 (/ +screen-width+ 2)
+                                                 (/ +screen-height+ 2))
+                                   (gamekit:vec2 0 20))))
+
+(defmethod handle-key ((this game-over-state) key)
+  (with-slots (restart-callback) this
+    (when (eq key :space)
+      (funcall restart-callback))))
 
 (gamekit:defgame snake-game ()
-  ((current-state :accessor state-of))
+  ((current-state))
   (:viewport-title "Snake")
   (:viewport-width +screen-width+)
   (:viewport-height +screen-height+)
@@ -173,8 +194,7 @@
     (labels ((start ()
                (setf current-state (make-instance 'game-state :end #'end)))
              (end ()
-               ;; TODO(bsvercl): Game over state.
-               (print "uh oh, we haven't implemented this yet.")))
+               (setf current-state (make-instance 'game-over-state :restart #'start))))
       (setf current-state (make-instance 'main-menu-state :start #'start)))
     (macrolet ((%binder (key &body body)
                  `(gamekit:bind-button ,key :pressed #'(lambda () ,@body))))
