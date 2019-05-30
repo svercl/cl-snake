@@ -59,6 +59,19 @@
                                             (gamekit:vec2 +segments-across-width+
                                                           +segments-across-height+))))))
 
+(defun hit-itself (snake)
+  ;; TODO(bsvercl): How do you make this elegant in LISP?
+  ;; I want to do something like
+  ;; for (segment = 0; segment < segments.len; segment++) {
+  ;;   if segment position is equal to head position then return true
+  ;;   // implicit continue
+  ;; }
+  (let ((segments (segments-of snake)))
+    (some #'(lambda (x) (eq x t))
+          (loop for this = (first segments)
+                for that in (rest segments)
+                collect (vec2= this that)))))
+
 (gamekit:defgame snake-game ()
   ((player :reader player-of)
    (food-pos :reader food-pos-of)
