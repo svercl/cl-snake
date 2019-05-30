@@ -60,6 +60,7 @@
     (setf (direction-of snake) new-direction)))
 
 (defun advance (snake ate-food-p)
+  "Moves the SNAKE according to it's DIRECTION."
   (with-slots (segments direction) snake
     (let* ((position (snake-position snake))
            ;; The position of the next head.
@@ -74,9 +75,10 @@
                                                           +segments-across-height+))))))
 
 (defun hit-itself (snake)
+  "Did I just eat myself?"
   (let ((head-position (snake-position snake)))
     (loop for segment in (snake-tail snake)
-          when (vec2= segment head-position)
+          when (bodge-math:vec= segment head-position)
             do (return-from hit-itself t))))
 
 (defclass state () ())
@@ -98,17 +100,18 @@
 
 (defmethod draw ((this main-menu-state))
   (declare (ignore this))
-  (let ((bounds (gamekit:calc-text-bounds "Welcome to SNAKE"))))
+  ;; TODO(bsvercl): Center this?
   (gamekit:draw-text "Welcome to SNAKE" (gamekit:vec2 (/ +screen-width+ 2)
                                                       (/ +screen-height+ 2)))
   (gamekit:draw-text "Press SPACE to play" (gamekit:add (gamekit:vec2 (/ +screen-width+ 2)
-                                                                       (/ +screen-height+ 2))
-                                                         (gamekit:vec2 0 -20))))
+                                                                      (/ +screen-height+ 2))
+                                                        (gamekit:vec2 0 -20))))
 
 (defclass game-state (state)
-  ((player :type snake :reader player-of)
-   (food-pos :type gamekit:vec2 :reader food-pos-of)
-   (score :type integer :initform 0 :reader score-of)
+  ((player :reader player-of)
+   (food-pos :reader food-pos-of)
+   (score :initform 0 :reader score-of)
+   (paused :initform nil)
    (end-callback :initarg :end)))
 
 (defmethod initialize-instance :after ((this game-state) &key)
