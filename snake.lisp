@@ -212,4 +212,6 @@
     (draw current-state)))
 
 (defun play (&optional blocking)
-  (gamekit:start 'snake-game :viewport-resizable nil :blocking blocking))
+  (gamekit:start 'snake-game :viewport-resizable nil
+                             :blocking blocking
+                             :swap-interval 1))
