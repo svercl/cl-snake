@@ -41,6 +41,10 @@
 (defmethod (setf snake-position) (pos snake)
   (setf (first (segments-of snake)) pos))
 
+(defun snake-tail (snake)
+  "The rest of the SNAKE."
+  (rest (segments-of snake)))
+
 ;; TODO(bsvercl): Don't allow Left<->Right Up<->Down
 (defun change-direction (snake new-direction)
   "Modify DIRECTION of SNAKE with NEW-DIRECTION."
@@ -60,17 +64,10 @@
                                                           +segments-across-height+))))))
 
 (defun hit-itself (snake)
-  ;; TODO(bsvercl): How do you make this elegant in LISP?
-  ;; I want to do something like
-  ;; for (segment = 0; segment < segments.len; segment++) {
-  ;;   if segment position is equal to head position then return true
-  ;;   // implicit continue
-  ;; }
-  (let ((segments (segments-of snake)))
-    (some #'(lambda (x) (eq x t))
-          (loop for this = (first segments)
-                for that in (rest segments)
-                collect (vec2= this that)))))
+  (let ((head-position (snake-position snake)))
+    (loop for segment in (snake-tail snake)
+          when (vec2= segment head-position)
+            do (return-from hit-itself t))))
 
 (gamekit:defgame snake-game ()
   ((player :reader player-of)
