@@ -196,16 +196,12 @@
              (end ()
                (setf current-state (make-instance 'game-over-state :restart #'start))))
       (setf current-state (make-instance 'main-menu-state :start #'start)))
-    (macrolet ((%binder (key &body body)
-                 `(gamekit:bind-button ,key :pressed #'(lambda () ,@body))))
-      ;; TODO(bsvercl): Make this prettier.
-      (%binder :w (handle-key current-state :w))
-      (%binder :s (handle-key current-state :s))
-      (%binder :a (handle-key current-state :a))
-      (%binder :d (handle-key current-state :d))
-      (%binder :space (handle-key current-state :space))
-      (%binder :q (handle-key current-state :q))
-      (%binder :e (handle-key current-state :e)))))
+    (macrolet ((%%binder (key &body body)
+                 `(gamekit:bind-button ,key :pressed #'(lambda () ,@body)))
+               (%binder ((&rest keys))
+                 `(dolist (key ,keys)
+                    (%%binder key (handle-key current-state key)))))
+      (%binder '(:w :a :s :d :space :q :e)))))
 
 (defmethod gamekit:act ((this snake-game))
   (with-slots (current-state) this
