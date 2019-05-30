@@ -2,6 +2,8 @@
 
 (in-package #:snake)
 
+;; TODO(bsvercl): It would be nice to have highscores.
+
 (defparameter +segment-size+ 25)
 (defparameter +screen-width+ 800)
 (defparameter +screen-height+ 600)
