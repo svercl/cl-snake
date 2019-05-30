@@ -15,12 +15,6 @@
 (defparameter +grid-color+ (gamekit:vec4 0.9 0.9 0.9 0.5))
 (defparameter +transparent+ (gamekit:vec4))
 
-(defun vec2= (this that)
-  (and (= (gamekit:x this)
-          (gamekit:x that))
-       (= (gamekit:y this)
-          (gamekit:y that))))
-
 (defun mod-vec (this that)
   "MOD x and y of THIS by x and y of THAT."
   (gamekit:vec2 (mod (gamekit:x this) (gamekit:x that))
@@ -123,7 +117,7 @@
 (defmethod update ((this game-state))
   (with-slots (player food-pos score) this
     (let* ((pos (snake-position player))
-           (ate-food-p (vec2= food-pos pos)))
+           (ate-food-p (bodge-math:vec= food-pos pos)))
       (advance player ate-food-p)
       (when ate-food-p
         (setf food-pos (new-food-pos))

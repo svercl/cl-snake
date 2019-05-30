@@ -6,6 +6,6 @@
   :license  "MIT"
   :version "0.0.1"
   :serial t
-  :depends-on (#:trivial-gamekit #:alexandria)
+  :depends-on (#:trivial-gamekit #:alexandria #:bodge-math)
   :components ((:file "package")
                (:file "snake")))
