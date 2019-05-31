@@ -95,11 +95,13 @@
 (defmethod draw ((this main-menu-state))
   (declare (ignore this))
   ;; TODO(bsvercl): Center this?
-  (gamekit:draw-text "Welcome to SNAKE" (gamekit:vec2 (/ +screen-width+ 2)
-                                                      (/ +screen-height+ 2)))
-  (gamekit:draw-text "Press SPACE to play" (gamekit:add (gamekit:vec2 (/ +screen-width+ 2)
-                                                                      (/ +screen-height+ 2))
-                                                        (gamekit:vec2 0 -20))))
+  (gamekit:draw-text "Welcome to SNAKE"
+                     (gamekit:vec2 (/ +screen-width+ 2)
+                                   (/ +screen-height+ 2)))
+  (gamekit:draw-text "Press SPACE to play"
+                     (gamekit:add (gamekit:vec2 (/ +screen-width+ 2)
+                                                (/ +screen-height+ 2))
+                                  (gamekit:vec2 0 -20))))
 
 (defclass game-state (state)
   ((player :reader player-of)
@@ -124,7 +126,6 @@
         (setf food-pos (new-food-pos))
         (incf score 50))
       (when (hit-itself player)
-        (setf score -1)
         (funcall end-callback)))))
 
 (defmethod draw ((this game-state))
@@ -156,6 +157,7 @@
       (:s (change-direction player :down))
       (:a (change-direction player :left))
       (:d (change-direction player :right))
+      ;; NOTE(bsvercl): These are for debugging.
       (:space (change-direction player :nothing))
       (:q (setf food-pos (new-food-pos))))))
 
@@ -212,6 +214,7 @@
     (draw current-state)))
 
 (defun play (&optional blocking)
+  "Let's get crackalackin'."
   (gamekit:start 'snake-game :viewport-resizable nil
                              :blocking blocking
                              :swap-interval 1))
