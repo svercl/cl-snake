@@ -8,4 +8,6 @@
   :serial t
   :depends-on (#:trivial-gamekit #:alexandria #:bodge-math)
   :components ((:file "package")
-               (:file "snake")))
+               (:file "snake")
+               (:file "util")
+               (:file "state")))
