@@ -17,7 +17,8 @@
 
 (defclass snake ()
   ((segments :initarg :segments :accessor segments-of)
-   (direction :initarg :direction :accessor direction-of))
+   (direction :initarg :direction :accessor direction-of)
+   (color :initform +snake-color+ :accessor color-of))
   (:documentation "The moving thing, usually user controlled."))
 
 (defun make-snake (starting-position &optional (direction (gamekit:vec2)))
@@ -87,6 +88,8 @@
     (macrolet ((%%binder (key &body body)
                  "Binds one KEY to execute BODY on press."
                  `(gamekit:bind-button ,key :pressed #'(lambda () ,@body)))
+               ;; TODO(bsvercl): This might not need to be a macro, but
+               ;; that's just me being a little pedantic.
                (%binder ((&rest keys))
                  "Binds all KEYS."
                  `(dolist (key ,keys)
