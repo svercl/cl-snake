@@ -35,6 +35,11 @@
    (paused :initform nil)
    (end-callback :initarg :end)))
 
+(defun new-food-pos ()
+  "Generates a new spot on the grid."
+  (gamekit:vec2 (random +segments-across-width+)
+                (random +segments-across-height+)))
+
 (defmethod initialize-instance :after ((this game-state) &key)
   (with-slots (player food-pos) this
     (setf food-pos (new-food-pos))

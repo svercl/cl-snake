@@ -77,11 +77,6 @@
   (:viewport-height +screen-height+)
   (:act-rate 10))
 
-(defun new-food-pos ()
-  "Generates a new spot on the grid."
-  (gamekit:vec2 (random +segments-across-width+)
-                (random +segments-across-height+)))
-
 (defmethod gamekit:post-initialize ((this snake-game))
   (with-slots (current-state) this
     (labels ((start ()
