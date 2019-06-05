@@ -33,7 +33,9 @@
    (food-pos :reader food-pos-of)
    (score :initform 0 :reader score-of)
    (paused :initform nil)
-   (end-callback :initarg :end)))
+   (end-callback :initarg :end)
+   (powerups :initform nil :reader %powerups-of))
+  (:documentation "This is where we play."))
 
 (defun new-food-pos ()
   "Generates a new spot on the grid."
@@ -62,20 +64,17 @@
   ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
   (loop for x from 0 below +segments-across-width+
         do (loop for y from 0 below +segments-across-height+
-                 do (gamekit:draw-rect (gamekit:mult (gamekit:vec2 x y)
-                                                     +segment-size+)
-                                       +segment-size+ +segment-size+
-                                       :fill-paint +transparent+
-                                       :stroke-paint +grid-color+)))
+                 do (draw-segment (gamekit:vec2 x y)
+                                  :fill-paint +transparent+
+                                  :stroke-paint +grid-color+)))
   ;; Draw food
-  (gamekit:draw-rect (gamekit:mult (food-pos-of this) +segment-size+)
-                     +segment-size+ +segment-size+
-                     :fill-paint +food-color+)
+  (draw-segment (food-pos-of this) :fill-paint +food-color+)
   ;; Draw SNAKE
-  (dolist (pos (segments-of (player-of this)))
-    (gamekit:draw-rect (gamekit:mult pos +segment-size+)
-                       +segment-size+ +segment-size+
-                       :fill-paint +snake-color+))
+  (let* ((player (player-of this))
+         (segments (segments-of player))
+         (color (color-of player)))
+    (dolist (pos segments)
+      (draw-segment pos :fill-paint color)))
   ;; Draw SCORE
   (gamekit:draw-text (format nil "Score: ~A" (score-of this))
                      (gamekit:vec2 25 (- +screen-height+ 25))))
