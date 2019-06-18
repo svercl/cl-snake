@@ -60,7 +60,8 @@
         (funcall end-callback)))))
 
 (defmethod draw ((this game-state))
-  ;; TODO(bsvercl): Drop into CL-BODGE to speed this up.
+  ;; TODO(bsvercl): Drop into CL-BODGE to speed this up,
+  ;; or just remove this completely?
   (loop for x from 0 below +segments-across-width+
         do (loop for y from 0 below +segments-across-height+
                  do (draw-segment (gamekit:vec2 x y)

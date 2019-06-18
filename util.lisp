@@ -23,3 +23,12 @@
                      size size
                      :fill-paint fill-paint
                      :stroke-paint stroke-paint))
+
+(defun direction-vec (direction)
+  (case direction
+    (:up (gamekit:vec2 0 1))
+    (:down (gamekit:vec2 0 -1))
+    (:left (gamekit:vec2 -1 0))
+    (:right (gamekit:vec2 1 0))
+    ;; We don't know that this is supposed to be.
+    (t (gamekit:vec2))))

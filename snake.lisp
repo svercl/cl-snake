@@ -40,21 +40,14 @@
 ;; TODO(bsvercl): Don't allow Left<->Right Up<->Down
 (defun change-direction (snake direction)
   "Modify DIRECTION of SNAKE with NEW-DIRECTION."
-  (let ((new-direction (case direction
-                         (:up (gamekit:vec2 0 1))
-                         (:down (gamekit:vec2 0 -1))
-                         (:left (gamekit:vec2 -1 0))
-                         (:right (gamekit:vec2 1 0))
-                         ;; We don't know that this is supposed to be.
-                         (t (gamekit:vec2)))))
-    (setf (direction-of snake) new-direction)))
+  (setf (direction-of snake) direction))
 
 (defun advance (snake ate-food-p)
   "Moves the SNAKE according to it's DIRECTION."
   (with-slots (segments direction) snake
     (let* ((position (snake-position snake))
            ;; The position of the next head.
-           (new-head (gamekit:add position direction))
+           (new-head (gamekit:add position (direction-vec direction)))
            ;; If we ate the food we do not chop off the end of the SEGMENTS.
            (which-segments (if ate-food-p segments (butlast segments)))
            (new-segments (push new-head which-segments)))
