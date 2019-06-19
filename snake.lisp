@@ -61,7 +61,7 @@
   (with-slots (segments direction) snake
     (let* ((position (snake-position snake))
            ;; The position of the next head.
-           (new-head (gamekit:add position (direction-vec direction)))
+           (new-head (gamekit:add position (direction-to-vec direction)))
            ;; If we ate the food we do not chop off the end of the SEGMENTS.
            (which-segments (if ate-food-p segments (butlast segments)))
            (new-segments (push new-head which-segments)))

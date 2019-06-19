@@ -24,7 +24,7 @@
                      :fill-paint fill-paint
                      :stroke-paint stroke-paint))
 
-(defun direction-vec (direction)
+(defun direction-to-vec (direction)
   (case direction
     (:up (gamekit:vec2 0 1))
     (:down (gamekit:vec2 0 -1))
