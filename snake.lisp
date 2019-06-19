@@ -37,10 +37,24 @@
   "The rest of the SNAKE."
   (rest (segments-of snake)))
 
-;; TODO(bsvercl): Don't allow Left<->Right Up<->Down
 (defun change-direction (snake direction)
   "Modify DIRECTION of SNAKE with NEW-DIRECTION."
-  (setf (direction-of snake) direction))
+  (let ((current (direction-of snake)))
+    ;; TODO: This is so bad.
+    (cond
+      ((and (eq current :left)
+            (eq direction :right))
+       (setf (direction-of snake) :left))
+      ((and (eq current :right)
+            (eq direction :left))
+       (setf (direction-of snake) :right))
+      ((and (eq current :up)
+            (eq direction :down))
+       (setf (direction-of snake) :up))
+      ((and (eq current :down)
+            (eq direction :up))
+       (setf (direction-of snake) :down))
+      (t (setf (direction-of snake) direction)))))
 
 (defun advance (snake ate-food-p)
   "Moves the SNAKE according to it's DIRECTION."
