@@ -30,7 +30,7 @@
   "Head position of SNAKE."
   (first (segments-of snake)))
 
-(defmethod (setf snake-position) (pos snake)
+(defmethod (setf snake-position) (pos (snake snake))
   (setf (first (segments-of snake)) pos))
 
 (defun snake-tail (snake)
@@ -38,7 +38,7 @@
   (rest (segments-of snake)))
 
 (defun change-direction (snake direction)
-  "Modify DIRECTION of SNAKE with NEW-DIRECTION."
+  "Set DIRECTION-OF SNAKE to DIRECTION.. maybe"
   (let ((current (direction-of snake)))
     ;; TODO: This is so bad.
     (cond
